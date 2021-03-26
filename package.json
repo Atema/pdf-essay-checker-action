@@ -1,0 +1,19 @@
+{
+  "name": "pdf-essay-checker-action",
+  "version": "1.0.0",
+  "description": "PDF Essay Checker using GitHub Actions",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Atema/pdf-essay-checker-action.git"
+  },
+  "author": "Martijn Atema <martijn@atema.one>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Atema/pdf-essay-checker-action/issues"
+  },
+  "homepage": "https://github.com/Atema/pdf-essay-checker-action#readme",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^4.0.0"
+  }
+}
