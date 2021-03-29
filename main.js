@@ -9,14 +9,22 @@ async function main() {
     const maxWordCount = getNumberInput("max-word-count");
 
     const context = github.context;
+
+    if (context.eventName != "pull_request")
+        throw new Error("This action works only on pull requests");
+
+    const pull_request = context.payload.pull_request;
+
     const octokit = github.getOctokit(token);
 
-    const commit = await octokit.git.getCommit({
-        ...context.repo,
-        commit_sha: context.sha
-    });
+    const files = await octokit.paginate(
+        octokit.pulls.listFiles.endpoint.merge({
+            ...context.repo,
+            pull_number: pull_request.number
+        })
+    );
 
-    core.info(JSON.stringify(commit, null, 2));
+    core.info(JSON.stringify(files, null, 2));
 }
 
 
