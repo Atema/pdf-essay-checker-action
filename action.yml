@@ -6,6 +6,7 @@ inputs:
     description: 'Relative path under $GITHUB_WORKSPACE where the repository is checked out'
   file-glob:
     description: 'Pattern to match changed files to be considered (relative to repository-path)'
+    default: '**/*.pdf'
   token:
     description: 'GitHub token'
     default: ${{ github.token }}

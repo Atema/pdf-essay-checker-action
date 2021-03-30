@@ -1,9 +1,10 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
+const Minimatch = require("minimatch").Minimatch;
 
 async function main() {
     const repositoryPath = core.getInput('repository-path');
-    const fileGlob = core.getInput('file-glob');
+    const fileGlob = new Minimatch(core.getInput('file-glob'));
     const token = core.getInput('token');
     const minWordCount = getNumberInput("min-word-count");
     const maxWordCount = getNumberInput("max-word-count");
@@ -17,12 +18,12 @@ async function main() {
 
     const octokit = github.getOctokit(token);
 
-    const files = await octokit.paginate(
+    const files = (await octokit.paginate(
         octokit.pulls.listFiles.endpoint.merge({
             ...context.repo,
             pull_number: pull_request.number
         })
-    );
+    )).filter((file) => file.status != "removed" && fileGlob.match(file.filename));
 
     core.info(JSON.stringify(files, null, 2));
 }
