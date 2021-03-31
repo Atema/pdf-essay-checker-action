@@ -1,9 +1,13 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
+const fs = require('fs');
+const path = require('path');
+const pdfjs = require('pdfjs-dist/es5/build/pdf.js');
 const Minimatch = require("minimatch").Minimatch;
+const wordsCount = require("words-count").default;
 
 async function main() {
-    const repositoryPath = core.getInput('repository-path');
+    const repositoryPath = core.getInput('repository-path') || '';
     const fileGlob = new Minimatch(core.getInput('file-glob'));
     const token = core.getInput('token');
     const minWordCount = getNumberInput("min-word-count");
@@ -22,10 +26,43 @@ async function main() {
         octokit.pulls.listFiles.endpoint.merge({
             ...context.repo,
             pull_number: pull_request.number
-        })
-    )).filter((file) => file.status != "removed" && fileGlob.match(file.filename));
+        }),
+        (response) => response.data
+            .filter((file) => file.status != "removed" && fileGlob.match(file.filename))
+            .map((file) => {
+                return {
+                    name: file.filename,
+                    path: path.join(process.env.GITHUB_WORKSPACE, repositoryPath, file.filename)
+                };
+            })
+    ));
 
-    core.info(JSON.stringify(files, null, 2));
+    for (let file of files) {
+        core.startGroup(`Checking ${file.name}`);
+
+        const doc = await pdfjs.getDocument(fs.readFileSync(file.path)).promise;
+
+        let wc = 0;
+
+        for (let i = 1; i <= doc.numPages; i++) {
+            let pageText = "";
+            let lastY = 0;
+
+            (await (await doc.getPage(i)).getTextContent()).items.forEach((item) => {
+                pageText += (lastY == item.transform[5] || pageText.endsWith("-")) ?
+                    item.str :
+                    '\n' + item.str;
+
+                lastY = item.transform[5];
+            });
+
+            wc += wordsCount(pageText);
+        }
+
+        core.info(`Word count: ${wc}`);
+
+        core.endGroup();
+    }
 }
 
 
@@ -38,4 +75,4 @@ function getNumberInput(input) {
     return value;
 }
 
-main().catch((error) => core.setFailed(error.message));
+main().catch((error) => core.setFailed(error));
