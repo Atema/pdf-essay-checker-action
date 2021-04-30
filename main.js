@@ -45,9 +45,12 @@ async function main() {
             })
     ));
 
+    let comment = '## PDF Essay Checker Report\n\n';
+
     // Check the word count of each of the files
     for (let file of files) {
         core.startGroup(`Checking ${file.name}`);
+        comment += `### ${file.name}\n\n`;
 
         const doc = await pdfjs.getDocument(fs.readFileSync(file.path)).promise;
 
@@ -76,17 +79,37 @@ async function main() {
         file.maxWordCountPass = maxWordCount < 0 || maxWordCount >= file.wordCount;
 
         core.info(`Word count: ${file.wordCount}`);
+        comment += `Word count: **${file.wordCount}**`;
 
-        if (minWordCount >= 0)
-            core.info(`Minimum word count check: ${file.minWordCountPass ? '✔️ PASS' : '❌ FAIL'}`)
+        if (minWordCount >= 0 || maxWordCount >= 0)
+            comment += ' (';
+
+        if (minWordCount >= 0) {
+            core.info(`Minimum word count check: ${file.minWordCountPass ? '✔️ PASS' : '❌ FAIL'}`);
+            comment += `minimum: ${file.minWordCountPass ? '**✔️ PASS**' : '**❌ FAIL**'}`;
+        }
+
+        if (minWordCount >= 0 && maxWordCount >= 0)
+            comment += ', ';
 
         if (maxWordCount >= 0)
-            core.info(`Maximum word count check: ${file.maxWordCountPass ? '✔️ PASS' : '❌ FAIL'}`)
+            core.info(`Maximum word count check: ${file.maxWordCountPass ? '✔️ PASS' : '❌ FAIL'}`);
+            comment += `maximum: ${file.maxWordCount ? '**✔️ PASS**' : '**❌ FAIL**'}`;
+
+        if (minWordCount >= 0 || maxWordCount >= 0)
+            comment += ')';
+
+        comment += '\n\n';
+
 
         core.endGroup();
     }
 
-    core.info(JSON.stringify(files));
+    octokit.issues.createComment({
+        ...context.repo,
+        issue_number: pull_request.number,
+        body: comment
+    });
 }
 
 /**
