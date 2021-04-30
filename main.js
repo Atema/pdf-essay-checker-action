@@ -3,32 +3,37 @@ const github = require('@actions/github');
 const fs = require('fs');
 const path = require('path');
 const pdfjs = require('pdfjs-dist/es5/build/pdf.js');
-const Minimatch = require("minimatch").Minimatch;
-const wordsCount = require("words-count").default;
+const Minimatch = require('minimatch').Minimatch;
+const wordsCount = require('words-count').default;
 
 async function main() {
-    const repositoryPath = core.getInput('repository-path') || '';
+    // Read all parameters and check if their values are correct
+    const repositoryPath = core.getInput('repository-path');
     const fileGlob = new Minimatch(core.getInput('file-glob'));
     const token = core.getInput('token');
-    const minWordCount = getNumberInput("min-word-count");
-    const maxWordCount = getNumberInput("max-word-count");
+    const minWordCount = getNumberInput('min-word-count');
+    const maxWordCount = getNumberInput('max-word-count');
+    const requireAllPass = getBooleanInput('require-all-pass');
+    const reportActionPass = getBoolean('report-action-pass');
+    const reportPrComment = getBoolean('report-pr-comment');
 
     const context = github.context;
 
-    if (context.eventName != "pull_request")
-        throw new Error("This action works only on pull requests");
+    if (context.eventName != 'pull_request')
+        throw new Error('This action works only on pull requests');
 
     const pull_request = context.payload.pull_request;
 
     const octokit = github.getOctokit(token);
 
+    // Compile a list of files (name and path) that have been added or changed by the pull request
     const files = (await octokit.paginate(
         octokit.pulls.listFiles.endpoint.merge({
             ...context.repo,
             pull_number: pull_request.number
         }),
         (response) => response.data
-            .filter((file) => file.status != "removed" && fileGlob.match(file.filename))
+            .filter((file) => file.status != 'removed' && fileGlob.match(file.filename))
             .map((file) => {
                 return {
                     name: file.filename,
@@ -37,6 +42,7 @@ async function main() {
             })
     ));
 
+    // Check the word count of each
     for (let file of files) {
         core.startGroup(`Checking ${file.name}`);
 
@@ -45,16 +51,16 @@ async function main() {
         let wc = 0;
 
         for (let i = 1; i <= doc.numPages; i++) {
-            let pageText = "";
+            let pageText = '';
             let lastY = 0;
 
-            (await (await doc.getPage(i)).getTextContent()).items.forEach((item) => {
-                pageText += (lastY == item.transform[5] || pageText.endsWith("-")) ?
-                    item.str :
-                    '\n' + item.str;
+            for (let item of (await (await doc.getPage(i)).getTextContent()).items) {
+                pageText += (lastY == item.transform[5]) ? item.str : '\n' + item.str;
 
                 lastY = item.transform[5];
-            });
+            }
+
+            core.info(pageText);
 
             wc += wordsCount(pageText);
         }

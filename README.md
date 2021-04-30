@@ -8,7 +8,7 @@ The following is a list of all input parameters that are supported by the PDF Es
 
 ## repository-path
 
-Default: ``
+Default: `''`
 
 The relative path under $GITHUB_WORKSPACE where the repository is checked out. This should be the same as the path supplied to the [Checkout](https://github.com/actions/checkout) action, if it is used. Generally, changing this value should not be necessary.
 

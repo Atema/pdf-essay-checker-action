@@ -4,6 +4,7 @@ description: PDF Essay Checker using GitHub Actions
 inputs:
   repository-path:
     description: Relative path under $GITHUB_WORKSPACE where the repository is checked out
+    default: ''
   file-glob:
     description: Pattern to match changed files to be considered (relative to repository-path)
     default: '**/*.pdf'
@@ -16,6 +17,9 @@ inputs:
   max-word-count:
     description: Maximum word count that is required to pass the checks
     default: -1
+  require-all-pass:
+    description: Whether all matched file should pass the checks
+    default: false
 
 outputs:
   word-count:
