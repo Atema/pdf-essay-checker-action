@@ -58,7 +58,7 @@ Whether to report the results as a comment on the pull request. This comment wil
 
 # Example Usage
 
-To use this action, create a workflow file in the `.github/workflows` file of your repository (named `pdfessaychecker.yml`, for example). See [here](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions) for more information about the syntax of these workflow configuration files. The following is an example configuration that executes PDF Essay Checker.
+To use this action, create a workflow file in the `.github/workflows` file of your repository (named `pdf-essay-checker.yml`, for example). See [here](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions) for more information about the syntax of these workflow configuration files. The following is an example configuration that executes PDF Essay Checker.
 
 ```yaml
 name: PDF Essay Checker
