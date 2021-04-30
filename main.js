@@ -92,9 +92,10 @@ async function main() {
         if (minWordCount >= 0 && maxWordCount >= 0)
             comment += ', ';
 
-        if (maxWordCount >= 0)
+        if (maxWordCount >= 0) {
             core.info(`Maximum word count check: ${file.maxWordCountPass ? '✔️ PASS' : '❌ FAIL'}`);
             comment += `maximum: ${file.maxWordCount ? '**✔️ PASS**' : '**❌ FAIL**'}`;
+        }
 
         if (minWordCount >= 0 || maxWordCount >= 0)
             comment += ')';
