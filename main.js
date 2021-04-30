@@ -80,7 +80,7 @@ async function main() {
         if (minWordCount >= 0)
             core.info(`Minimum word count check: ${file.minWordCountPass ? '✔️ PASS' : '❌ FAIL'}`)
 
-        if (minWordCount >= 0)
+        if (maxWordCount >= 0)
             core.info(`Maximum word count check: ${file.maxWordCountPass ? '✔️ PASS' : '❌ FAIL'}`)
 
         core.endGroup();
