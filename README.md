@@ -1,6 +1,6 @@
 # PDF Essay Checker Action
 
-This GitHub action checks PDF files (for example, essays), to see whether their word counts are within set limits.
+This GitHub action checks PDF files (for example, essays) that are submitted to a repository in a pull request, to see whether their word counts are within set limits.
 
 # Input Parameters
 
@@ -49,6 +49,10 @@ on:
     # Only run the action when the path matches
     paths:
     - examples/**/*.pdf
+    # Only run the action when a pull request is opened or commits are added
+    types:
+    - opened
+    - synchronize
 
 jobs:
   pdf-essay-checker:
@@ -61,7 +65,7 @@ jobs:
       # Run the PDF Essay Checker action.
     - name: PDF Essay Checker Action
       uses: atema/pdf-essay-checker-action@main
-      # Parameters to supply to the action (see the previous section for all options)
+      # Parameters supplied to the action (see the previous section for all options)
       with:
         file-glob: examples/**/*.pdf
         min-word-count: 1750

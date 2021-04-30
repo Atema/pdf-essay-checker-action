@@ -65,14 +65,33 @@ async function main() {
     }
 }
 
-
-function getNumberInput(input) {
-    const value = parseFloat(core.getInput(input));
+/**
+ * Parses the contents of an input parameter as a number
+ *
+ * @param {string} param Name of the parameter
+ * @returns {number} Parsed value of the parameter
+ * @throws {Error} Value of the parameter must be parsable as a number
+ */
+function getNumberInput(param) {
+    const value = parseFloat(core.getInput(param));
 
     if (isNaN(value))
-        throw new Error(`Input '${input}' is not a valid number`);
+        throw new Error(`Input '${param}' is not a valid number`);
 
     return value;
+}
+
+/**
+ * Parses the contents of an input parameter as a boolean
+ *
+ * @param {string} param Name of the parameter
+ * @returns {boolean} Parsed value of the parameter
+ * @throws {Error} Value of the parameter must be parsable as a boolean
+ */
+function getBooleanInput(param) {
+    const value = core.getInput(param).toLowerCase();;
+
+    return value == 'true' || value == '1';
 }
 
 main().catch((error) => core.setFailed(error));
