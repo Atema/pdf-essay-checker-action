@@ -53,9 +53,10 @@ async function main() {
         for (let i = 1; i <= doc.numPages; i++) {
             let pageText = '';
             let lastY = 0;
+            let lastFontName = '';
 
             for (let item of (await (await doc.getPage(i)).getTextContent({ normalizeWhitespace: true })).items) {
-                pageText += (lastY == item.transform[5] || pageText.endsWith("-")) ?
+                pageText += (lastY == item.transform[5] || pageText.endsWith("-") || lastFontName != item.fontName) ?
                     item.str : ' ' + item.str;
 
                 lastY = item.transform[5];
