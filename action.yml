@@ -17,23 +17,15 @@ inputs:
   max-word-count:
     description: Maximum word count that is required to pass the checks
     default: -1
-  require-all-pass:
-    description: Whether all matched file should pass the checks
-    default: false
   report-action-status:
     description: Whether to report the final result as the status (exit code) of the action
     default: true
   require-all-pass:
-    description: Whether to require all matched files to pass checks, instead of only one
+    description: Whether all matched files should pass the checks, instead of only one
     default: false
   report-pr-comment:
     description: Whether to report the results as a comment on the pull request
     default: false
-
-
-outputs:
-  word-count:
-    description: Number of words in the file
 
 runs:
   using: node12
