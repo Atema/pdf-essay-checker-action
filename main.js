@@ -73,7 +73,7 @@ async function main() {
         }
 
         file.minWordCountPass = minWordCount < 0 || minWordCount <= file.wordCount;
-        file.maxWordCountPass = maxWordCount < 0|| maxWordCount >= file.wordCount;
+        file.maxWordCountPass = maxWordCount < 0 || maxWordCount >= file.wordCount;
 
         core.info(`Word count: ${file.wordCount}`);
 
