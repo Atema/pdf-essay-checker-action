@@ -44,9 +44,9 @@ To use this action, create a workflow file in the `.github/workflows` file of yo
 name: PDF Essay Checker
 
 on:
-  # Only pull_request is currently supported as a triggering event.
+  # Only pull_request is currently supported as a triggering event
   pull_request:
-    # Only run the action when the path matches.
+    # Only run the action when the path matches
     paths:
     - examples/**/*.pdf
 
@@ -55,13 +55,13 @@ jobs:
     runs-on: ubuntu-latest
     name: PDF Essay Checker
     steps:
-      # Checkout the repository before running the action.
+      # Checkout the repository before running the action
     - name: Checkout
       uses: actions/checkout@v2
       # Run the PDF Essay Checker action.
     - name: PDF Essay Checker Action
       uses: atema/pdf-essay-checker-action@main
-      # Parameters to supply to the action. See the previous section for all options.
+      # Parameters to supply to the action (see the previous section for all options)
       with:
         file-glob: examples/**/*.pdf
         min-word-count: 1750
