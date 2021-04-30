@@ -37,40 +37,50 @@ async function main() {
             .map((file) => {
                 return {
                     name: file.filename,
-                    path: path.join(process.env.GITHUB_WORKSPACE, repositoryPath, file.filename)
+                    path: path.join(process.env.GITHUB_WORKSPACE, repositoryPath, file.filename),
+                    wordCount: 0,
+                    minWordCountPass: false,
+                    minWordCountPass: false
                 };
             })
     ));
 
-    // Check the word count of each
+    // Check the word count of each of the files
     for (let file of files) {
         core.startGroup(`Checking ${file.name}`);
 
         const doc = await pdfjs.getDocument(fs.readFileSync(file.path)).promise;
 
-        let wc = 0;
-
         for (let i = 1; i <= doc.numPages; i++) {
+            const page = await doc.getPage(i);
+            const pageContent = await page.getTextContent({ normalizeWhitespace: true })
+
             let pageText = '';
             let lastY = 0;
             let lastFontName = '';
 
-            for (let item of (await (await doc.getPage(i)).getTextContent({ normalizeWhitespace: true })).items) {
-                pageText += ((lastY == item.transform[5] || pageText.endsWith("-")) && lastFontName == item.fontName) ?
-                    item.str : ' ' + item.str;
+            for (let item of pageContent.items) {
+                if ((lastY == item.transform[5] || pageText.endsWith("-")) && lastFontName == item.fontName)
+                    pageText += item.str;
+                else
+                    pageText += ' ' + item.str;
 
                 lastY = item.transform[5];
+                lastFontName = item.fontName;
             }
 
-            core.info(pageText);
-
-            wc += wordsCount(pageText);
+            file.wordCount += wordsCount(pageText);
         }
 
-        core.info(`Word count: ${wc}`);
+        core.info(`Word count: ${file.wordCount}`);
+
+        file.minWordCountPass = minWordCount == -1 || minWordCount <= file.wordCount;
+        file.maxWordCountPass = minWordCount == -1 || minWordCount <= file.wordCount;
 
         core.endGroup();
     }
+
+    core.info(JSON.stringify(files));
 }
 
 /**

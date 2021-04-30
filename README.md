@@ -2,6 +2,8 @@
 
 This GitHub action checks PDF files (for example, essays) that are submitted to a repository in a pull request, to see whether their word counts are within set limits.
 
+[PDF.js](https://github.com/mozilla/pdf.js) is used to parse the text of the detected PDF files, after which [words-count](https://www.npmjs.com/package/words-count) is applied for accurate multi-language word counting.
+
 # Input Parameters
 
 The following is a list of all input parameters that are supported by the PDF Essay Checker action. These can be included in the `with` option of the workflow configuration to override the given defaults.
