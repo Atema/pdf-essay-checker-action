@@ -7,15 +7,15 @@ const Minimatch = require('minimatch').Minimatch;
 const wordsCount = require('words-count').default;
 
 async function main() {
-    // Read all parameters and check if their values are correct
-    const repositoryPath = core.getInput('repository-path');
-    const fileGlob = new Minimatch(core.getInput('file-glob'));
-    const token = core.getInput('token');
-    const minWordCount = getNumberInput('min-word-count');
-    const maxWordCount = getNumberInput('max-word-count');
-    const requireAllPass = getBooleanInput('require-all-pass');
-    const reportActionPass = getBooleanInput('report-action-pass');
-    const reportPrComment = getBooleanInput('report-pr-comment');
+    // Read all input parameters and check if their values are correct
+    const repositoryPath = core.getInput('repository-path'),
+          fileGlob = new Minimatch(core.getInput('file-glob')),
+          token = core.getInput('token'),
+          minWordCount = getNumberInput('min-word-count'),
+          maxWordCount = getNumberInput('max-word-count'),
+          reportActionStatus = getBooleanInput('report-action-status'),
+          requireAllPass = getBooleanInput('require-all-pass'),
+          reportPrComment = getBooleanInput('report-pr-comment');
 
     const context = github.context;
 
@@ -26,7 +26,7 @@ async function main() {
 
     const octokit = github.getOctokit(token);
 
-    // Compile a list of files (name and path) that have been added or changed by the pull request
+    // Retrieve a list of files (name and path) that have been added or changed by the pull request
     const files = (await octokit.paginate(
         octokit.pulls.listFiles.endpoint.merge({
             ...context.repo,
@@ -37,10 +37,7 @@ async function main() {
             .map((file) => {
                 return {
                     name: file.filename,
-                    path: path.join(process.env.GITHUB_WORKSPACE, repositoryPath, file.filename),
-                    wordCount: 0,
-                    minWordCountPass: false,
-                    minWordCountPass: false
+                    path: path.join(process.env.GITHUB_WORKSPACE, repositoryPath, file.filename)
                 };
             })
     ));
@@ -51,6 +48,7 @@ async function main() {
     for (let file of files) {
         core.startGroup(`Checking ${file.name}`);
         comment += `### ${file.name}\n\n`;
+        file.wordCount = 0;
 
         const doc = await pdfjs.getDocument(fs.readFileSync(file.path)).promise;
 
@@ -81,45 +79,50 @@ async function main() {
         core.info(`Word count: ${file.wordCount}`);
         comment += `Word count: **${file.wordCount}**`;
 
-        if (minWordCount >= 0 || maxWordCount >= 0)
+        if (minWordCount >= 0 || maxWordCount >= 0) {
             comment += ' (';
 
-        if (minWordCount >= 0) {
-            core.info(`Minimum word count check: ${file.minWordCountPass ? '✔️ PASS' : '❌ FAIL'}`);
-            comment += `minimum: ${file.minWordCountPass ? '**✔️ PASS**' : '**❌ FAIL**'}`;
-        }
+            if (minWordCount >= 0) {
+                core.info(`Minimum word count check: ${file.minWordCountPass ? '✔️ PASS' : '❌ FAIL'}`);
+                comment += `minimum: ${file.minWordCountPass ? '**✔️ PASS**' : '**❌ FAIL**'}`;
+            }
 
-        if (minWordCount >= 0 && maxWordCount >= 0)
-            comment += ', ';
+            if (minWordCount >= 0 && maxWordCount >= 0)
+                comment += ', ';
 
-        if (maxWordCount >= 0) {
-            core.info(`Maximum word count check: ${file.maxWordCountPass ? '✔️ PASS' : '❌ FAIL'}`);
-            comment += `maximum: ${file.maxWordCount ? '**✔️ PASS**' : '**❌ FAIL**'}`;
-        }
+            if (maxWordCount >= 0) {
+                core.info(`Maximum word count check: ${file.maxWordCountPass ? '✔️ PASS' : '❌ FAIL'}`);
+                comment += `maximum: ${file.maxWordCount ? '**✔️ PASS**' : '**❌ FAIL**'}`;
+            }
 
-        if (minWordCount >= 0 || maxWordCount >= 0)
             comment += ')';
+        }
 
         comment += '\n\n';
-
 
         core.endGroup();
     }
 
-    octokit.issues.createComment({
-        ...context.repo,
-        issue_number: pull_request.number,
-        body: comment
-    });
+    // Leave comment on the pull request if desired
+    if (reportPrComment)
+        octokit.issues.createComment({
+            ...context.repo,
+            issue_number: pull_request.number,
+            body: comment
+        });
+
+    // Fail the action if desired and not passed
+    if (reportActionStatus) {
+        const passCount = files.reduce((count, file) => count + (file.minWordCountPass && file.maxWordCountPass), 0);
+
+        if (requireAllPass && passCount < files.length)
+            core.setFailed('Some files failed word count checks');
+        else if (!requireAllPass && passCount == 0)
+            core.setFailed('No file passed word count checks');
+    }
 }
 
-/**
- * Parses the contents of an input parameter as a number
- *
- * @param {string} param Name of the parameter
- * @returns {number} Parsed value of the parameter
- * @throws {Error} Value of the parameter must be parsable as a number
- */
+// Parses the contents of an input parameter as a number
 function getNumberInput(param) {
     const value = parseFloat(core.getInput(param));
 
@@ -129,13 +132,7 @@ function getNumberInput(param) {
     return value;
 }
 
-/**
- * Parses the contents of an input parameter as a boolean
- *
- * @param {string} param Name of the parameter
- * @returns {boolean} Parsed value of the parameter
- * @throws {Error} Value of the parameter must be parsable as a boolean
- */
+// Parses the contents of an input parameter as a boolean
 function getBooleanInput(param) {
     const value = core.getInput(param).toLowerCase();;
 

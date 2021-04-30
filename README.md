@@ -38,6 +38,24 @@ Default: `-1`
 
 Defines the maximum word count that is required to pass the checks. A value of `-1` skips the maximum word count check.
 
+## report-action-status
+
+Default: `true`
+
+Whether to report the final result as the status (exit code) of the action. When set to `false`, the action will succeed regardless of whether the word count checks have passed.
+
+## require-all-pass
+
+Default: `false`
+
+When set to `true`, all matched files are required to pass the checks for a final passing result. When set to `false`, only one matched file is required to pass the checks.
+
+## report-pr-comment
+
+Default: `false`
+
+Whether to report the results as a comment on the pull request. This comment will contain word counts for each of the files, as well as whether the word count checks were passed.
+
 # Example Usage
 
 To use this action, create a workflow file in the `.github/workflows` file of your repository (named `pdfessaychecker.yml`, for example). See [here](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions) for more information about the syntax of these workflow configuration files. The following is an example configuration that executes PDF Essay Checker.
