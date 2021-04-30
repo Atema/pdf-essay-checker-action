@@ -72,12 +72,16 @@ async function main() {
             file.wordCount += wordsCount(pageText);
         }
 
-        file.minWordCountPass = minWordCount == -1 || minWordCount <= file.wordCount;
-        file.maxWordCountPass = maxWordCount == -1 || maxWordCount >= file.wordCount;
+        file.minWordCountPass = minWordCount < 0 || minWordCount <= file.wordCount;
+        file.maxWordCountPass = maxWordCount < 0|| maxWordCount >= file.wordCount;
 
         core.info(`Word count: ${file.wordCount}`);
-        core.info(`Minimum word count check: ${file.minWordCountPass ? '✔️ PASS' : '❌ FAIL'}`)
-        core.info(`Maximum word count check: ${file.maxWordCountPass ? '✔️ PASS' : '❌ FAIL'}`)
+
+        if (minWordCount >= 0)
+            core.info(`Minimum word count check: ${file.minWordCountPass ? '✔️ PASS' : '❌ FAIL'}`)
+
+        if (minWordCount >= 0)
+            core.info(`Maximum word count check: ${file.maxWordCountPass ? '✔️ PASS' : '❌ FAIL'}`)
 
         core.endGroup();
     }
