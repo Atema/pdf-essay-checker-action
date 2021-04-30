@@ -14,8 +14,8 @@ async function main() {
     const minWordCount = getNumberInput('min-word-count');
     const maxWordCount = getNumberInput('max-word-count');
     const requireAllPass = getBooleanInput('require-all-pass');
-    const reportActionPass = getBoolean('report-action-pass');
-    const reportPrComment = getBoolean('report-pr-comment');
+    const reportActionPass = getBooleanInput('report-action-pass');
+    const reportPrComment = getBooleanInput('report-pr-comment');
 
     const context = github.context;
 
