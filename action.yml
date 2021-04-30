@@ -1,30 +1,30 @@
-name: 'PDF Essay Checker'
-description: 'PDF Essay Checker using GitHub Actions'
+name: PDF Essay Checker
+description: PDF Essay Checker using GitHub Actions
 
 inputs:
   repository-path:
-    description: 'Relative path under $GITHUB_WORKSPACE where the repository is checked out'
+    description: Relative path under $GITHUB_WORKSPACE where the repository is checked out
   file-glob:
-    description: 'Pattern to match changed files to be considered (relative to repository-path)'
+    description: Pattern to match changed files to be considered (relative to repository-path)
     default: '**/*.pdf'
   token:
-    description: 'GitHub token'
+    description: The token that is used to interact with the GitHub API
     default: ${{ github.token }}
   min-word-count:
-    description: 'Minimum word count to pass the action'
-    default: '-1'
+    description: Minimum word count that is required to pass the checks
+    default: -1
   max-word-count:
-    description: 'Maximum word count to pass the action'
-    default: '-1'
+    description: Maximum word count that is required to pass the checks
+    default: -1
 
 outputs:
   word-count:
-    description: 'Number of words in the file'
+    description: Number of words in the file
 
 runs:
-  using: 'node12'
-  main: 'main.js'
+  using: node12
+  main: main.js
 
 branding:
-  icon: 'file-text'
-  color: 'orange'
+  icon: file-text
+  color: orange
