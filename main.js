@@ -54,8 +54,9 @@ async function main() {
             let pageText = '';
             let lastY = 0;
 
-            for (let item of (await (await doc.getPage(i)).getTextContent()).items) {
-                pageText += (lastY == item.transform[5]) ? item.str : '\n' + item.str;
+            for (let item of (await (await doc.getPage(i)).getTextContent({ normalizeWhitespace: true })).items) {
+                pageText += (lastY == item.transform[5] || pageText.endsWith("-")) ?
+                    item.str : ' ' + item.str;
 
                 lastY = item.transform[5];
             }
